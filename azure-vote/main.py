@@ -91,7 +91,20 @@ else:
     title = app.config['TITLE']
 
 # Redis Connection
-r = redis.Redis()
+# r = redis.Redis()
+
+redis_server = os.environ['REDIS']
+
+try:
+      if "REDIS_PWD" in os.environ:
+         r = redis.StrictRedis(host=redis_server,
+                           port=6379,
+                           password=os.environ['REDIS_PWD'])
+      else:
+         r = redis.Redis(redis_server)
+      r.ping()
+except redis.ConnectionError:
+      exit('Failed to connect to Redis, terminating.')
 
 # Change title to host name to demo NLB
 if app.config['SHOWHOST'] == "true":
@@ -159,4 +172,4 @@ if __name__ == "__main__":
     # Use the statement below when running locally
     app.run() 
     # Use the statement below before deployment to VMSS
-    # app.run(host='0.0.0.0', threaded=True, debug=True) # remote
+    app.run(host='0.0.0.0', threaded=True, debug=True) # remote
